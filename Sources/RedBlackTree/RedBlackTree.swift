@@ -19,6 +19,7 @@ import Foundation
 /// which requires that it defines the `⊰` operator which determines ordering
 /// and a boolean functions to set whether keys must be unique or not and
 /// whether they are stored in FIFO or LIFO order.
+
 public enum RedBlackTree<R: RedBlackTreeRecordProtocol, K> where K == R.RedBlackTreeKey {
    case empty
    indirect case node(_ colour: NodeColour,
