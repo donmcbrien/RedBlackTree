@@ -15,7 +15,7 @@ import Foundation
 /// The tree must conform to `RedBlackTreeRecordProtocol` which simply
 /// requires that it has a member (usually a computed variable provided in
 /// an extension to the record object) which acts as the key to determine
-/// ordering. The key must conform to the `RedBlackTreeKeyProtocol` protocol
+/// ordering. The key must conform to the `RedBlackTreeKeyProtocol`
 /// which requires that it defines the `⊰` operator which determines ordering
 /// and a boolean functions to set whether keys must be unique or not and
 /// whether they are stored in FIFO or LIFO order.
@@ -26,6 +26,7 @@ public enum RedBlackTree<R: RedBlackTreeRecordProtocol, K> where K == R.RedBlack
       _ record: R,
       _ left: RedBlackTree<R,K>,
       _ right: RedBlackTree<R,K>)
+   
    public init() {
       self = .empty
    }
@@ -44,7 +45,7 @@ public protocol RedBlackTreeRecordProtocol {
 /// Protocol adopted by the keys of records stored in an `RedBlackTree`.
 ///
 /// Defines the `⊰` operator used to determine the order of keys and
-/// boolean functions to set whether keys must be unique or not and
+/// boolean properties to set whether keys must be unique or not and
 /// whether they are stored in FIFO or LIFO order.
 public protocol RedBlackTreeKeyProtocol {
    /// Comparison operator for ordering a RedBlackTree. Used to
@@ -72,7 +73,8 @@ public protocol RedBlackTreeKeyProtocol {
 }
 
 extension RedBlackTreeKeyProtocol {
-   /// Default implementation. Duplicate entries should be ignored on insertion.
+   /// Default implementation. If truee, dplicate entries should be ignored
+   /// when inserting records in the tree.
    static var duplicatesAllowed: Bool { return false }
    /// default implementation. Deletion is First-In-First-Out. Otherwise First-In-First-Out.
    static var duplicatesUseFIFO: Bool { return true }
@@ -80,14 +82,13 @@ extension RedBlackTreeKeyProtocol {
 
 //MARK:- Contains/Neighbours.  Examine the Tree without changing it.
 extension RedBlackTree {
-   /// Checks if `RedBlackTree` contains `key`?
+   /// Recursively checks if `RedBlackTree` contains `key`?
    ///
    /// - Parameter key: key part of desired record
    /// - Returns: `true` or `false`
    public func contains(_ key: K) -> Bool {
       switch self {
-      case .empty:
-         return false
+      case .empty: return false
       case let .node(_, record, left, right):
          switch key ⊰ record.redBlackTreeKey {
          case .matching: return true
@@ -107,8 +108,7 @@ extension RedBlackTree {
    /// - Returns: the corresponding record or `nil` if not found
    public func fetch(_ key: K) -> R? {
       switch self {
-      case .empty:
-         return nil
+      case .empty: return nil
       case let .node(_, record, left, right):
          switch (key ⊰ record.redBlackTreeKey, K.duplicatesAllowed, K.duplicatesUseFIFO) {
          case (.matching, false, _): return record
@@ -255,7 +255,7 @@ extension RedBlackTree {
 //MARK:- CustomStringConvertible Conformance
 /// Produces graphic description of a `RedBlackTree`
 extension RedBlackTree: CustomStringConvertible {
-   public func diagram(_ top: String = "",
+   private func diagram(_ top: String = "",
                        _ centre: String = "",
                        _ bottom: String = "") -> String {
       switch self {
