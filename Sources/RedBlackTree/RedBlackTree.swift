@@ -184,10 +184,10 @@ extension RedBlackTree {
             var l,r: R?
             if left.contains(key) { // look deeper
                l = left.neighboursFor(key, leftRecord: leftRecord, rightRecord: record).0
-            } else { l = left.maximum ?? leftRecord }
+            } else { l = left.last ?? leftRecord }
             if right.contains(key) {
                r = right.neighboursFor(key, leftRecord: record, rightRecord: rightRecord).1
-            } else { r = right.minimum ?? rightRecord }
+            } else { r = right.first ?? rightRecord }
             return (l,r)
          case .leftTree: return left.neighboursFor(key, leftRecord: leftRecord, rightRecord: record)
          case .rightTree: return right.neighboursFor(key, leftRecord: record, rightRecord: rightRecord)
@@ -205,27 +205,27 @@ extension RedBlackTree {
       }
    }
    
-   /// Fetch the rightmost element in a `RedBlackTree`.
-   /// Returns rightmost record or nil if the tree is empty. Tree is unchanged.
-   public var maximum: R? {
-      switch self {
-      case .empty:
-         return nil
-      case let .node(_, record, _, right):
-         if right.maximum == nil { return record }
-         return right.maximum
-      }
-   }
-   
-   /// Fetch the leftmost element in a `RedBlackTree`.
+   /// Fetch the first element in a `RedBlackTree`.
    /// Returns leftmost record or nil if the tree is empty. Tree is unchanged.
-   public var minimum: R? {
+   public var first: R? {
       switch self {
       case .empty:
          return nil
       case let .node(_, record, left, _):
-         if left.minimum == nil { return record }
-         return left.minimum
+         if left.first == nil { return record }
+         return left.first
+      }
+   }
+   
+   /// Fetch the last element in a `RedBlackTree`.
+   /// Returns rightmost record or nil if the tree is empty. Tree is unchanged.
+   public var last: R? {
+      switch self {
+      case .empty:
+         return nil
+      case let .node(_, record, _, right):
+         if right.last == nil { return record }
+         return right.last
       }
    }
    
