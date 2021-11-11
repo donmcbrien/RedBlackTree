@@ -17,15 +17,15 @@ import Foundation
 /// an extension to the record object) which acts as the key to determine
 /// ordering. The key must conform to the `RedBlackTreeKeyProtocol`
 /// which requires that it defines the `⊰` operator which determines ordering
-/// and a boolean functions to set whether keys must be unique or not and
+/// and two boolean functions to set whether keys must be unique or not and
 /// whether they are stored in FIFO or LIFO order.
 
 public enum RedBlackTree<R: RedBlackTreeRecordProtocol, K> where K == R.RedBlackTreeKey {
    case empty
    indirect case node(_ colour: NodeColour,
-      _ record: R,
-      _ left: RedBlackTree<R,K>,
-      _ right: RedBlackTree<R,K>)
+                      _ record: R,
+                      _ left: RedBlackTree<R,K>,
+                      _ right: RedBlackTree<R,K>)
    
    public init() {
       self = .empty
@@ -88,13 +88,13 @@ extension RedBlackTree {
    /// - Returns: `true` or `false`
    public func contains(_ key: K) -> Bool {
       switch self {
-      case .empty: return false
-      case let .node(_, record, left, right):
-         switch key ⊰ record.redBlackTreeKey {
-         case .matching: return true
-         case .leftTree: return left.contains(key)
-         case .rightTree: return right.contains(key)
-         }
+         case .empty: return false
+         case let .node(_, record, left, right):
+            switch key ⊰ record.redBlackTreeKey {
+               case .matching: return true
+               case .leftTree: return left.contains(key)
+               case .rightTree: return right.contains(key)
+            }
       }
    }
    
@@ -108,19 +108,19 @@ extension RedBlackTree {
    /// - Returns: the corresponding record or `nil` if not found
    public func fetch(_ key: K) -> R? {
       switch self {
-      case .empty: return nil
-      case let .node(_, record, left, right):
-         switch (key ⊰ record.redBlackTreeKey, K.duplicatesAllowed, K.duplicatesUseFIFO) {
-         case (.matching, false, _): return record
-         case (.matching, true, let usesFIFO):
-            var e: R?
-            if usesFIFO { e = left.fetch(key) }
-            else { e = right.fetch(key) }
-            if e == nil { return record }
-            else { return e }
-         case (.leftTree, _, _): return left.fetch(key)
-         case (.rightTree, _, _): return right.fetch(key)
-         }
+         case .empty: return nil
+         case let .node(_, record, left, right):
+            switch (key ⊰ record.redBlackTreeKey, K.duplicatesAllowed, K.duplicatesUseFIFO) {
+               case (.matching, false, _): return record
+               case (.matching, true, let usesFIFO):
+                  var e: R?
+                  if usesFIFO { e = left.fetch(key) }
+                  else { e = right.fetch(key) }
+                  if e == nil { return record }
+                  else { return e }
+               case (.leftTree, _, _): return left.fetch(key)
+               case (.rightTree, _, _): return right.fetch(key)
+            }
       }
    }
    
@@ -135,27 +135,27 @@ extension RedBlackTree {
    public func fetchAll(_ key: K) -> [R] {
       var result = [R]()
       switch self {
-      case .empty:
-         return result
-      case let .node(_, record, left, right):
-         switch (key ⊰ record.redBlackTreeKey, K.duplicatesAllowed, K.duplicatesUseFIFO) {
-         case (.matching, false, _):
-            result.append(record)
-         case (.matching, true, let usesFIFO):
-            if usesFIFO {
-               result.append(contentsOf: left.fetchAll(key))
-               result.append(record)
-               result.append(contentsOf: right.fetchAll(key))
-            } else {
-               result.append(contentsOf: right.fetchAll(key))
-               result.append(record)
-               result.append(contentsOf: left.fetchAll(key))
+         case .empty:
+            return result
+         case let .node(_, record, left, right):
+            switch (key ⊰ record.redBlackTreeKey, K.duplicatesAllowed, K.duplicatesUseFIFO) {
+               case (.matching, false, _):
+                  result.append(record)
+               case (.matching, true, let usesFIFO):
+                  if usesFIFO {
+                     result.append(contentsOf: left.fetchAll(key))
+                     result.append(record)
+                     result.append(contentsOf: right.fetchAll(key))
+                  } else {
+                     result.append(contentsOf: right.fetchAll(key))
+                     result.append(record)
+                     result.append(contentsOf: left.fetchAll(key))
+                  }
+               case (.leftTree, _, _):
+                  result.append(contentsOf: left.fetchAll(key))
+               case (.rightTree, _, _):
+                  result.append(contentsOf: right.fetchAll(key))
             }
-         case (.leftTree, _, _):
-            result.append(contentsOf: left.fetchAll(key))
-         case (.rightTree, _, _):
-            result.append(contentsOf: right.fetchAll(key))
-         }
       }
       return result
    }
@@ -175,23 +175,24 @@ extension RedBlackTree {
    /// Duplicate keys are not neighbours.
    public func neighboursFor(_ key: K, leftRecord: R? = nil, rightRecord: R? = nil) -> (R?,R?) {
       switch self {
-      case .empty:
-         return (leftRecord, rightRecord)
-      case let .node(_, record, left, right):
-         switch key ⊰ record.redBlackTreeKey {
-         case .matching:
-            // search further to eliminate duplicates left and right
-            var l,r: R?
-            if left.contains(key) { // look deeper
-               l = left.neighboursFor(key, leftRecord: leftRecord, rightRecord: record).0
-            } else { l = left.last ?? leftRecord }
-            if right.contains(key) {
-               r = right.neighboursFor(key, leftRecord: record, rightRecord: rightRecord).1
-            } else { r = right.first ?? rightRecord }
-            return (l,r)
-         case .leftTree: return left.neighboursFor(key, leftRecord: leftRecord, rightRecord: record)
-         case .rightTree: return right.neighboursFor(key, leftRecord: record, rightRecord: rightRecord)
-         }
+         case .empty:
+            return (leftRecord, rightRecord)
+         case let .node(_, record, left, right):
+            switch (key ⊰ record.redBlackTreeKey, K.duplicatesAllowed) {
+               case (.matching, false): return (left.last ?? leftRecord, right.first ?? rightRecord)
+               case (.matching, true):
+                  // search further to eliminate duplicates left and right
+                  var l,r: R?
+                  if left.contains(key) { // look deeper
+                     l = left.neighboursFor(key, leftRecord: leftRecord, rightRecord: record).0
+                  } else { l = left.last ?? leftRecord }
+                  if right.contains(key) {
+                     r = right.neighboursFor(key, leftRecord: record, rightRecord: rightRecord).1
+                  } else { r = right.first ?? rightRecord }
+                  return (l,r)
+               case (.leftTree, _): return left.neighboursFor(key, leftRecord: leftRecord, rightRecord: record)
+               case (.rightTree, _): return right.neighboursFor(key, leftRecord: record, rightRecord: rightRecord)
+            }
       }
    }
 }
@@ -200,8 +201,8 @@ extension RedBlackTree {
 extension RedBlackTree {
    public var isEmpty: Bool {
       switch self {
-      case .empty: return true
-      default: return false
+         case .empty: return true
+         default: return false
       }
    }
    
@@ -209,11 +210,11 @@ extension RedBlackTree {
    /// Returns leftmost record or nil if the tree is empty. Tree is unchanged.
    public var first: R? {
       switch self {
-      case .empty:
-         return nil
-      case let .node(_, record, left, _):
-         if left.first == nil { return record }
-         return left.first
+         case .empty:
+            return nil
+         case let .node(_, record, left, _):
+            if left.first == nil { return record }
+            return left.first
       }
    }
    
@@ -221,11 +222,11 @@ extension RedBlackTree {
    /// Returns rightmost record or nil if the tree is empty. Tree is unchanged.
    public var last: R? {
       switch self {
-      case .empty:
-         return nil
-      case let .node(_, record, _, right):
-         if right.last == nil { return record }
-         return right.last
+         case .empty:
+            return nil
+         case let .node(_, record, _, right):
+            if right.last == nil { return record }
+            return right.last
       }
    }
    
@@ -233,10 +234,10 @@ extension RedBlackTree {
    /// Tree is unchanged.
    public var count: Int {
       switch self {
-      case .empty:
-         return 0
-      case let .node(_, _, left, right):
-         return left.count + 1 + right.count
+         case .empty:
+            return 0
+         case let .node(_, _, left, right):
+            return left.count + 1 + right.count
       }
    }
    
@@ -244,10 +245,10 @@ extension RedBlackTree {
    /// Tree is unchanged.
    public var height: Int {
       switch self {
-      case .empty:
-         return 0
-      case let .node(_, _, left, right):
-         return 1 + max(left.height, right.height)
+         case .empty:
+            return 0
+         case let .node(_, _, left, right):
+            return 1 + max(left.height, right.height)
       }
    }
 }
@@ -256,15 +257,15 @@ extension RedBlackTree {
 /// Produces graphic description of a `RedBlackTree`
 extension RedBlackTree: CustomStringConvertible {
    private func diagram(_ top: String = "",
-                       _ centre: String = "",
-                       _ bottom: String = "") -> String {
+                        _ centre: String = "",
+                        _ bottom: String = "") -> String {
       switch self {
-      case .empty:
-         return centre + "◦\n"
-      case let .node(colour, record, .empty, .empty):
-         return centre + "\(colour)\(record)\n"
-      case let .node(colour, record, left, right):
-         return right.diagram(top + "    ", top + "┌───", top + "│   ")
+         case .empty:
+            return centre + "◦\n"
+         case let .node(colour, record, .empty, .empty):
+            return centre + "\(colour)\(record)\n"
+         case let .node(colour, record, left, right):
+            return right.diagram(top + "    ", top + "┌───", top + "│   ")
             + centre + "\(colour)\(record)\n"
             + left.diagram(bottom + "│   ", bottom + "└───", bottom + "    ")
       }
@@ -322,9 +323,9 @@ extension RedBlackTree {
    public mutating func insert(_ element: R) -> Bool {
       let (tree, old) = recursiveInsert(element)
       switch tree {
-      case .empty: return false
-      case let .node(_, record, left, right):
-         self = .node(.black, record, left, right)
+         case .empty: return false
+         case let .node(_, record, left, right):
+            self = .node(.black, record, left, right)
       }
       return old == nil
    }
@@ -333,21 +334,21 @@ extension RedBlackTree {
    /// not be called directly.
    private func recursiveInsert(_ element: R) -> (tree: RedBlackTree, old: R?) {
       switch self {
-      case .empty:
-         return (.node(.red, element, .empty, .empty), nil)
-      case let .node(colour, record, left, right):
-         switch (element.redBlackTreeKey ⊰ record.redBlackTreeKey, K.duplicatesAllowed, K.duplicatesUseFIFO) {
-         case (.matching, false, _):
-            return (self, record)
-         case (.matching, true, false),(.leftTree, _, _):
-            let (l, old) = left.recursiveInsert(element)
-            if let old = old { return (self, old) }
-            return (RedBlackTree<R,K>.node(colour, record, l, right).redBalanced(), old)
-         case (.matching, true, true),(.rightTree, _, _):
-            let (r, old) = right.recursiveInsert(element)
-            if let old = old { return (self, old) }
-            return (RedBlackTree<R,K>.node(colour, record, left, r).redBalanced(), old)
-         }
+         case .empty:
+            return (.node(.red, element, .empty, .empty), nil)
+         case let .node(colour, record, left, right):
+            switch (element.redBlackTreeKey ⊰ record.redBlackTreeKey, K.duplicatesAllowed, K.duplicatesUseFIFO) {
+               case (.matching, false, _):
+                  return (self, record)
+               case (.matching, true, false),(.leftTree, _, _):
+                  let (l, old) = left.recursiveInsert(element)
+                  if let old = old { return (self, old) }
+                  return (RedBlackTree<R,K>.node(colour, record, l, right).redBalanced(), old)
+               case (.matching, true, true),(.rightTree, _, _):
+                  let (r, old) = right.recursiveInsert(element)
+                  if let old = old { return (self, old) }
+                  return (RedBlackTree<R,K>.node(colour, record, left, r).redBalanced(), old)
+            }
       }
    }
 }
@@ -364,9 +365,9 @@ extension RedBlackTree {
       let search = recursiveRemove(key)
       if search.removed != nil {
          switch search.tree {
-         case .empty: self = .empty
-         case let .node(_, record, left, right):
-            self = RedBlackTree<R,K>.node(.black, record, left, right)
+            case .empty: self = .empty
+            case let .node(_, record, left, right):
+               self = RedBlackTree<R,K>.node(.black, record, left, right)
          }
       }
       return search.removed
@@ -390,84 +391,84 @@ extension RedBlackTree {
    
    private func recursiveRemove(_ key: K) -> (tree: RedBlackTree<R,K>, fixHeight: Bool, removed: R?) {
       switch self {
-      case .empty:
-         return (self, false, nil)
-      case let .node(_, record, _, _):
-         switch (key ⊰ record.redBlackTreeKey, K.duplicatesAllowed, K.duplicatesUseFIFO) {
-         case (.matching, false, _):    // found it!!
-            let s = self.replace()
-            return (s.0, s.1, record)
-         case (.matching, true, let usesFIFO):    // found it!!
-            var e:(tree: RedBlackTree<R,K>, fixHeight: Bool, deleted: R?)
-            if usesFIFO { e = self.leftDelete(key) }
-            else { e = self.rightDelete(key) }
-            if e.deleted == nil {
-               let s = self.replace()
-               return (s.0, s.1, record)
-            } else {
-               return (e.tree.redBalanced(), e.fixHeight, e.deleted)
+         case .empty:
+            return (self, false, nil)
+         case let .node(_, record, _, _):
+            switch (key ⊰ record.redBlackTreeKey, K.duplicatesAllowed, K.duplicatesUseFIFO) {
+               case (.matching, false, _):    // found it!!
+                  let s = self.replace()
+                  return (s.0, s.1, record)
+               case (.matching, true, let usesFIFO):    // found it!!
+                  var e:(tree: RedBlackTree<R,K>, fixHeight: Bool, deleted: R?)
+                  if usesFIFO { e = self.leftDelete(key) }
+                  else { e = self.rightDelete(key) }
+                  if e.deleted == nil {
+                     let s = self.replace()
+                     return (s.0, s.1, record)
+                  } else {
+                     return (e.tree.redBalanced(), e.fixHeight, e.deleted)
+                  }
+               case (.leftTree, _, _):      // Still looking (left)
+                  let s = self.leftDelete(key)
+                  return (s.tree.redBalanced(), s.fixHeight, s.deleted)
+               case (.rightTree, _, _):     // Still looking (right)
+                  let s = self.rightDelete(key)
+                  return (s.tree.redBalanced(), s.fixHeight, s.deleted)
             }
-         case (.leftTree, _, _):      // Still looking (left)
-            let s = self.leftDelete(key)
-            return (s.tree.redBalanced(), s.fixHeight, s.deleted)
-         case (.rightTree, _, _):     // Still looking (right)
-            let s = self.rightDelete(key)
-            return (s.tree.redBalanced(), s.fixHeight, s.deleted)
-         }
       }
    }
    
    private func replace() -> (tree: RedBlackTree<R,K>, fixHeight: Bool) {
       switch self {
-      case let .node(.black, _, left, right):
-         let s = left.fused(right)
-         return (s, true)
-      case let .node(.red, _, left, right):
-         let s = left.fused(right)
-         return (s, false)
-      default: return (self, false)
+         case let .node(.black, _, left, right):
+            let s = left.fused(right)
+            return (s, true)
+         case let .node(.red, _, left, right):
+            let s = left.fused(right)
+            return (s, false)
+         default: return (self, false)
       }
    }
    
    private func leftDelete(_ key: K) -> (tree: RedBlackTree<R,K>, fixHeight: Bool, deleted: R?) {
       switch self {
-      case .empty:
-         return (self, false, nil)
-      case let .node(.red, record, left, right):
-         let s = left.recursiveRemove(key)
-         if s.fixHeight {
-            return (RedBlackTree<R,K>.node(.black, record, s.tree, right).leftBalanced(), false, s.removed)
-         } else {
-            return (RedBlackTree<R,K>.node(.red, record, s.tree, right), false, s.removed)
-         }
-      case let .node(.black, record, left, right):
-         let s = left.recursiveRemove(key)
-         if s.fixHeight {
-            return (RedBlackTree<R,K>.node(.black, record, s.tree, right).leftBalanced(), true, s.removed)
-         } else {
-            return (RedBlackTree<R,K>.node(.black, record, s.tree, right), false, s.removed)
-         }
+         case .empty:
+            return (self, false, nil)
+         case let .node(.red, record, left, right):
+            let s = left.recursiveRemove(key)
+            if s.fixHeight {
+               return (RedBlackTree<R,K>.node(.black, record, s.tree, right).leftBalanced(), false, s.removed)
+            } else {
+               return (RedBlackTree<R,K>.node(.red, record, s.tree, right), false, s.removed)
+            }
+         case let .node(.black, record, left, right):
+            let s = left.recursiveRemove(key)
+            if s.fixHeight {
+               return (RedBlackTree<R,K>.node(.black, record, s.tree, right).leftBalanced(), true, s.removed)
+            } else {
+               return (RedBlackTree<R,K>.node(.black, record, s.tree, right), false, s.removed)
+            }
       }
    }
    
    private func rightDelete(_ key: K) -> (tree: RedBlackTree<R,K>, fixHeight: Bool, deleted: R?) {
       switch self {
-      case .empty:
-         return (self, false, nil)
-      case let .node(.red, record, left, right):
-         let s = right.recursiveRemove(key)
-         if s.fixHeight {
-            return (RedBlackTree<R,K>.node(.black, record, left, s.tree).rightBalanced(), false, s.removed)
-         } else {
-            return (RedBlackTree<R,K>.node(.red, record, left, s.tree), s.fixHeight, s.removed)
-         }
-      case let .node(.black, record, left, right):
-         let s = right.recursiveRemove(key)
-         if s.fixHeight {
-            return (RedBlackTree<R,K>.node(.black, record, left, s.tree).rightBalanced(), s.fixHeight, s.removed)
-         } else {
-            return (RedBlackTree<R,K>.node(.black, record, left, s.tree), s.fixHeight, s.removed)
-         }
+         case .empty:
+            return (self, false, nil)
+         case let .node(.red, record, left, right):
+            let s = right.recursiveRemove(key)
+            if s.fixHeight {
+               return (RedBlackTree<R,K>.node(.black, record, left, s.tree).rightBalanced(), false, s.removed)
+            } else {
+               return (RedBlackTree<R,K>.node(.red, record, left, s.tree), s.fixHeight, s.removed)
+            }
+         case let .node(.black, record, left, right):
+            let s = right.recursiveRemove(key)
+            if s.fixHeight {
+               return (RedBlackTree<R,K>.node(.black, record, left, s.tree).rightBalanced(), s.fixHeight, s.removed)
+            } else {
+               return (RedBlackTree<R,K>.node(.black, record, left, s.tree), s.fixHeight, s.removed)
+            }
       }
    }
 }
@@ -476,69 +477,69 @@ extension RedBlackTree {
 extension RedBlackTree {
    private func fused(_ with: RedBlackTree<R,K>) -> RedBlackTree<R,K> {
       switch (self, with) {
-      case (.empty,.empty):
-         return .empty
-      case let (t1,.empty), let (.empty,t1):
-         return t1
-      case let (.node(.black, _, _, _), .node(.red, y, t3, t4)):
-         return RedBlackTree<R,K>.node(.red, y, self.fused(t3), t4).redBalanced()
-      case let (.node(.red, x, t1, t2), .node(.black, _, _, _)):
-         return RedBlackTree<R,K>.node(.red, x, t1, t2.fused(with)).redBalanced()
-      case let (.node(.red, x, t1, t2),.node(.red, y, t3, t4)):
-         let s = t2.fused(t3)
-         switch s {
-         case let .node(.red, z, s1, s2):
-            return RedBlackTree<R,K>.node(.red, z, .node(.red, x, t1, s1), .node(.red, y, s2, t4)).redBalanced()
-         default:
-            return RedBlackTree<R,K>.node(.red, x, t1, .node(.red, y, s, t4)).redBalanced()
-         }
-      case let (.node(.black, x, t1, t2),.node(.black, y, t3, t4)):
-         let s = t2.fused(t3)
-         switch s {
-         case let .node(.red, z, s1, s2):
-            return RedBlackTree<R,K>.node(.red, z, .node(.black, x, t1, s1), .node(.black, y, s2, t4)).redBalanced()
-         default:
-            return RedBlackTree<R,K>.node(.black, x, t1, .node(.red, y, s, t4)).redBalanced()
-         }
+         case (.empty,.empty):
+            return .empty
+         case let (t1,.empty), let (.empty,t1):
+            return t1
+         case let (.node(.black, _, _, _), .node(.red, y, t3, t4)):
+            return RedBlackTree<R,K>.node(.red, y, self.fused(t3), t4).redBalanced()
+         case let (.node(.red, x, t1, t2), .node(.black, _, _, _)):
+            return RedBlackTree<R,K>.node(.red, x, t1, t2.fused(with)).redBalanced()
+         case let (.node(.red, x, t1, t2),.node(.red, y, t3, t4)):
+            let s = t2.fused(t3)
+            switch s {
+               case let .node(.red, z, s1, s2):
+                  return RedBlackTree<R,K>.node(.red, z, .node(.red, x, t1, s1), .node(.red, y, s2, t4)).redBalanced()
+               default:
+                  return RedBlackTree<R,K>.node(.red, x, t1, .node(.red, y, s, t4)).redBalanced()
+            }
+         case let (.node(.black, x, t1, t2),.node(.black, y, t3, t4)):
+            let s = t2.fused(t3)
+            switch s {
+               case let .node(.red, z, s1, s2):
+                  return RedBlackTree<R,K>.node(.red, z, .node(.black, x, t1, s1), .node(.black, y, s2, t4)).redBalanced()
+               default:
+                  return RedBlackTree<R,K>.node(.black, x, t1, .node(.red, y, s, t4)).redBalanced()
+            }
       }
    }
    
    private func redBalanced() -> RedBlackTree<R,K> {
       switch self {
-      case let .node(_, z, .node(.red, y, .node(.red, x, a, b), c), d),
-           let .node(_, z, .node(.red, x, a, .node(.red, y, b, c)), d),
-           let .node(_, x, a, .node(.red, z, .node(.red, y, b, c), d)),
-           let .node(_, x, a, .node(.red, y, b, .node(.red, z, c, d))):
-         return .node(.red, y, .node(.black, x, a, b), .node(.black, z, c, d))
-      default: return self
+         case let .node(_, z, .node(.red, y, .node(.red, x, a, b), c), d),
+            let .node(_, z, .node(.red, x, a, .node(.red, y, b, c)), d),
+            let .node(_, x, a, .node(.red, z, .node(.red, y, b, c), d)),
+            let .node(_, x, a, .node(.red, y, b, .node(.red, z, c, d))):
+            return .node(.red, y, .node(.black, x, a, b), .node(.black, z, c, d))
+         default: return self
       }
    }
    
    private func leftBalanced() -> RedBlackTree<R,K> {
       switch self {
-      case let .node(.red, y, t1, .node(.black, k, t2, t3)):
-         return RedBlackTree<R,K>.node(.red, y, t1, .node(.red, k, t2, t3)).redBalanced()
-      case let .node(.black, y, .node(.red, x, t1, t2), t3):
-         return .node(.red, y, .node(.black, x, t1, t2), t3)
-      case let .node(.black, y, t1, .node(.black, z, t2, t3)):
-         return RedBlackTree<R,K>.node(.black, y, t1, .node(.red, z, t2, t3)).redBalanced()
-      case let .node(.black, y, t1, .node(.red, z, .node(.black, u, t2, t3), .node(.black, k, l, r))):
-         return .node(.red, u, .node(.black, y, t1, t2), RedBlackTree<R,K>.node(.black, z, t3, .node(.red, k, l, r)).redBalanced())
-      default: return self
+         case let .node(.red, y, t1, .node(.black, k, t2, t3)):
+            return RedBlackTree<R,K>.node(.red, y, t1, .node(.red, k, t2, t3)).redBalanced()
+         case let .node(.black, y, .node(.red, x, t1, t2), t3):
+            return .node(.red, y, .node(.black, x, t1, t2), t3)
+         case let .node(.black, y, t1, .node(.black, z, t2, t3)):
+            return RedBlackTree<R,K>.node(.black, y, t1, .node(.red, z, t2, t3)).redBalanced()
+         case let .node(.black, y, t1, .node(.red, z, .node(.black, u, t2, t3), .node(.black, k, l, r))):
+            return .node(.red, u, .node(.black, y, t1, t2), RedBlackTree<R,K>.node(.black, z, t3, .node(.red, k, l, r)).redBalanced())
+         default: return self
       }
    }
    
    private func rightBalanced() -> RedBlackTree<R,K> {
       switch self {
-      case let .node(.red, y, .node(.black, k, t2, t3), t1):
-         return RedBlackTree<R,K>.node(.red, y, .node(.red, k, t2, t3), t1).redBalanced()
-      case let .node(.black, y, t1, .node(.red, x, t2, t3)):
-         return .node(.red, y, t1, .node(.black, x, t2, t3))
-      case let .node(.black, y, .node(.black, z, t1, t2), t3):
-         return RedBlackTree<R,K>.node(.black, y, .node(.red, z, t1, t2), t3).redBalanced()
-      case let .node(.black, y, .node(.red, z, .node(.black, k, l, r), .node(.black, u, t2, t3)), t4):
-         return .node(.red, u, RedBlackTree<R,K>.node(.black, z, .node(.red, k, l, r), t2).redBalanced(), .node(.black, y, t3, t4))
-      default: return self
+         case let .node(.red, y, .node(.black, k, t2, t3), t1):
+            return RedBlackTree<R,K>.node(.red, y, .node(.red, k, t2, t3), t1).redBalanced()
+         case let .node(.black, y, t1, .node(.red, x, t2, t3)):
+            return .node(.red, y, t1, .node(.black, x, t2, t3))
+         case let .node(.black, y, .node(.black, z, t1, t2), t3):
+            return RedBlackTree<R,K>.node(.black, y, .node(.red, z, t1, t2), t3).redBalanced()
+         case let .node(.black, y, .node(.red, z, .node(.black, k, l, r), .node(.black, u, t2, t3)), t4):
+            return .node(.red, u, RedBlackTree<R,K>.node(.black, z, .node(.red, k, l, r), t2).redBalanced(), .node(.black, y, t3, t4))
+         default: return self
       }
    }
 }
@@ -546,9 +547,9 @@ extension RedBlackTree {
 extension RedBlackTree {
    public func array() -> [R] {
       switch self {
-      case .empty: return [R]()
-      case let .node(_, record, left, right):
-         return left.array() + [record] + right.array()
+         case .empty: return [R]()
+         case let .node(_, record, left, right):
+            return left.array() + [record] + right.array()
       }
    }
 }
@@ -577,8 +578,8 @@ public enum NodeColour: CustomStringConvertible {
    
    public var description: String {
       switch self {
-      case .black: return "◻︎"
-      case .red: return "◼︎"
+         case .black: return "◻︎"
+         case .red: return "◼︎"
       }
    }
 }
