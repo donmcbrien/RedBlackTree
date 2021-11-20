@@ -265,9 +265,9 @@ extension RedBlackTree: CustomStringConvertible {
          case let .node(colour, record, .empty, .empty):
             return centre + "\(colour)\(record)\n"
          case let .node(colour, record, left, right):
-            return right.diagram(top + "    ", top + "┌───", top + "│   ")
+            return left.diagram(top + "    ", top + "┌───", top + "│   ")
             + centre + "\(colour)\(record)\n"
-            + left.diagram(bottom + "│   ", bottom + "└───", bottom + "    ")
+            + right.diagram(bottom + "│   ", bottom + "└───", bottom + "    ")
       }
    }
    
