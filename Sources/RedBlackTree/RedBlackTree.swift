@@ -8,7 +8,7 @@
 
 import Foundation
 
-//MARK:- RED-BLACK BINARY TREE
+//MARK: - RED-BLACK BINARY TREE
 /// A data structure used to store objects (herein called records) in an
 /// order determined by its `redBlackTreeKey` member.
 ///
@@ -20,19 +20,18 @@ import Foundation
 /// and two boolean functions to set whether keys must be unique or not and
 /// whether they are stored in FIFO or LIFO order.
 
-public enum RedBlackTree<R: RedBlackTreeRecordProtocol, K> where K == R.RedBlackTreeKey {
+public indirect enum RedBlackTree<R: RedBlackTreeRecordProtocol, K>
+where K == R.RedBlackTreeKey {
    case empty
-   indirect case node(_ colour: NodeColour,
-                      _ record: R,
-                      _ left: RedBlackTree<R,K>,
-                      _ right: RedBlackTree<R,K>)
+   case node(_ colour: NodeColour,
+             _ record: R,
+             _ left: RedBlackTree<R,K>,
+             _ right: RedBlackTree<R,K>)
    
-   public init() {
-      self = .empty
-   }
+   public init() { self = .empty }
 }
 
-//MARK:- PROTOCOLs
+//MARK: - PROTOCOLS
 /// Protocol adopted by records stored in an `RedBlackTree`.
 ///
 /// Defines the key used by records stored in a RedBlackTree. They must
@@ -52,6 +51,7 @@ public protocol RedBlackTreeKeyProtocol {
    /// select which branch to follow when navigating a `RedBlackTree`
    /// by comparing the key sought with the key at the current
    /// position in the tree.
+   ///
    /// Beware: records are stored in the tree based on the evaluation of `⊰`
    /// at the moment of insertion. If this evaluation can change the
    /// position in the tree will not change unless the object is explicitly
@@ -197,7 +197,7 @@ extension RedBlackTree {
    }
 }
 
-//MARK:- Utilities
+//MARK: - Utilities
 extension RedBlackTree {
    public var isEmpty: Bool {
       switch self {
@@ -253,7 +253,7 @@ extension RedBlackTree {
    }
 }
 
-//MARK:- CustomStringConvertible Conformance
+//MARK: - CustomStringConvertible Conformance
 /// Produces graphic description of a `RedBlackTree`
 extension RedBlackTree: CustomStringConvertible {
    private func diagram(_ top: String = "",
@@ -276,7 +276,7 @@ extension RedBlackTree: CustomStringConvertible {
    }
 }
 
-//MARK:- Insertion
+//MARK: - Insertion
 extension RedBlackTree {
    /// Inserts an array of elements into a `RedBlackTree`.
    ///
@@ -353,7 +353,7 @@ extension RedBlackTree {
    }
 }
 
-//MARK:- Removal
+//MARK: - Removal
 extension RedBlackTree {
    /// Removes first record found containing key
    ///
@@ -473,7 +473,7 @@ extension RedBlackTree {
    }
 }
 
-//MARK:- Private Insertion/Deletion Helpers
+//MARK: - Private Insertion/Deletion Helpers
 extension RedBlackTree {
    private func fused(_ with: RedBlackTree<R,K>) -> RedBlackTree<R,K> {
       switch (self, with) {
@@ -554,7 +554,7 @@ extension RedBlackTree {
    }
 }
 
-//MARK:- ENUMs
+//MARK: - ENUMs
 /// Operator to choose ordering on `RedBlackTree`
 infix operator ⊰: ComparisonPrecedence
 
