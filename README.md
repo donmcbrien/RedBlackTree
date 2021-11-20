@@ -91,6 +91,7 @@ To use a tree, make your record type conform to RedBlackTreeRecordProtocol by ad
        public static var duplicatesUseFIFO: Bool { return false }
 
        public static func ⊰(lhs: MyKeyType, rhs: MyKeyType) -> RedBlackTreeComparator {
+           //descending order
           if lhs.myKey > rhs.myKey { return .leftTree }
           if lhs.myKey == rhs.myKey { return .matching }
           return .rightTree
@@ -154,9 +155,9 @@ These 7 records were refused insertion because their keys were already in use:
      144:   239.42
      443:   228.44
      
-THe tree accepted 93 insertions shown indescening order as required:
+The tree accepted 93 insertions shown in descending order as required:
 
-                                  ┌───◦
+                             ┌───◦
                          ┌───◻︎982:   354.64
                          │   └───◼︎976:  -994.05
                      ┌───◻︎894:   585.16
