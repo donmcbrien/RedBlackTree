@@ -97,7 +97,7 @@ To use a tree, make your record type conform to RedBlackTreeRecordProtocol by ad
        }
     }
 
-    Now you can declare and use a RedBlackTree 
+Now you can declare and use a RedBlackTree 
 
     var myRedBlackTree = RedBlackTree<MyRecordType, MyKeyType>()
 
