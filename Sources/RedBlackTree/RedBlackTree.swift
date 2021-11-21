@@ -253,6 +253,17 @@ extension RedBlackTree {
    }
 }
 
+//MARK: - Map<T>
+extension RedBlackTree {
+   public func map<T>(_ transform:(R) -> T) -> [T] {
+      switch self {
+         case .empty: return [T]()
+         case let .node(_, record, left, right):
+            return left.map(transform) + [transform(record)] + right.map(transform)
+      }
+   }
+}
+
 //MARK: - CustomStringConvertible Conformance
 /// Produces graphic description of a `RedBlackTree`
 extension RedBlackTree: CustomStringConvertible {
@@ -544,15 +555,6 @@ extension RedBlackTree {
    }
 }
 
-extension RedBlackTree {
-   public func array() -> [R] {
-      switch self {
-         case .empty: return [R]()
-         case let .node(_, record, left, right):
-            return left.array() + [record] + right.array()
-      }
-   }
-}
 
 //MARK: - ENUMs
 /// Operator to choose ordering on `RedBlackTree`

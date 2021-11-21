@@ -8,7 +8,7 @@ Red-Black Trees are binary search trees with particular characteristics that ass
 The following are invariant properties designed to achieve this:
 
 - Height-balance means that every vertical path has the same number of black (<b>) nodes giving all paths an equal basic length.
-- Red-balance means that no vertical path has two adjacent red (<r>) nodes so that path lengths may differ but never exceed twice the <b> height. Maximum height is therefore 2log2(n-1) for a tree containing n entries
+- Red-balance means that no vertical path has two adjacent red (<r>) nodes so that path lengths may differ but never exceed twice the <b> height. Maximum height is therefore 2log2(n+1) for a tree containing n entries
 - The root node of the entire tree is always black <b>
 - Empty nodes (<e>) are always counted as black.
 
@@ -40,10 +40,10 @@ A number of methods can be used to examing records in the tree without changing 
     public func contains(_ key: K) -> Bool 
 // reports whether a record containing the key is present
 
-    public var minimum: R?
+    public var first: R?
 // Find the leftmost record
 
-    public var maximum: R?
+    public var last: R?
 // Find the rightmost record
 
     public func fetch(_ key: K) -> R? {
@@ -60,6 +60,10 @@ A number of methods can be used to examing records in the tree without changing 
     public func neighboursFor(_ key: K, leftRecord: R? = nil, rightRecord: R? = nil) -> (R?,R?)
 // fetches the immediate neighbours, left and right, of where a record containing the key would be
 // (whether or not such a record is present). Duplicates of key are ignored.
+
+### Map
+    public func map<T>(_ transform:(R) -> T) -> [T]
+// produces an array by transforming a record using a closure
 
 ### Tree Inspection
 Finally a number of methods can be used to examine the tree in its entirety:
