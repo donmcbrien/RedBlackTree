@@ -274,7 +274,7 @@ extension RedBlackTree: CustomStringConvertible {
          case .empty:
             return centre + "◦\n"
          case let .node(colour, record, .empty, .empty):
-            return centre + "\(colour)\(record)\n"
+            return centre + "\(colour)\(record) (key: \(record.redBlackTreeKey))\n"
          case let .node(colour, record, left, right):
             return left.diagram(top + "    ", top + "┌───", top + "│   ")
             + centre + "\(colour)\(record) (key: \(record.redBlackTreeKey))\n"
