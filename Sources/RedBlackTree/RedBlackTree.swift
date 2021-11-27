@@ -277,7 +277,7 @@ extension RedBlackTree: CustomStringConvertible {
             return centre + "\(colour)\(record)\n"
          case let .node(colour, record, left, right):
             return left.diagram(top + "    ", top + "┌───", top + "│   ")
-            + centre + "\(colour)\(record)\n"
+            + centre + "\(colour)\(record) (key: \(record.redBlackTreeKey))\n"
             + right.diagram(bottom + "│   ", bottom + "└───", bottom + "    ")
       }
    }
@@ -580,8 +580,8 @@ public enum NodeColour: CustomStringConvertible {
    
    public var description: String {
       switch self {
-         case .black: return "◻︎"
-         case .red: return "◼︎"
+         case .black: return "◼︎"
+         case .red: return "◻︎"
       }
    }
 }

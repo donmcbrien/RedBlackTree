@@ -38,49 +38,49 @@ Records can be removed singly or in collections using one of the following metho
 A number of methods can be used to examing records in the tree without changing the tree:
 
     public func contains(_ key: K) -> Bool 
-// reports whether a record containing the key is present
+    // reports whether a record containing the key is present
 
     public var first: R?
-// Find the leftmost record
+    // Find the leftmost record
 
     public var last: R?
-// Find the rightmost record
+    // Find the rightmost record
 
     public func fetch(_ key: K) -> R? {
-// fetches a copy of the only record (or first when duplicates permitted), if any, containing the key
+    // fetches a copy of the only record (or first when duplicates permitted), if any, containing the key
 
     public func fetchAll(_ key: K) -> [R]
-// only relevant where duplicates are permitted, this method fetches copies of all records, if any,
-// containing the key, and sorted by the rule in the RedBlackTreeKeyProtocol
+    // only relevant where duplicates are permitted, this method fetches copies of all records, if any,
+    // containing the key, and sorted by the rule in the RedBlackTreeKeyProtocol
 
     public func neighboursOf(_ key: K) -> (R?,R?)?
-// fetches the immediate neighbours, left and right, of the record containing the key (but only 
+    // fetches the immediate neighbours, left and right, of the record containing the key (but only 
     // if such a record) is present in the tree. Duplicates of key are ignored.
 
     public func neighboursFor(_ key: K, leftRecord: R? = nil, rightRecord: R? = nil) -> (R?,R?)
-// fetches the immediate neighbours, left and right, of where a record containing the key would be
-// (whether or not such a record is present). Duplicates of key are ignored.
+    // fetches the immediate neighbours, left and right, of where a record containing the key would be
+    // (whether or not such a record is present). Duplicates of key are ignored.
 
-### Map
+### Map -> Array
     public func map<T>(_ transform:(R) -> T) -> [T]
-// produces an array by transforming a record using a closure
+    // produces an array by transforming a record using a closure
 
 ### Tree Inspection
 Finally a number of methods can be used to examine the tree in its entirety:
 
     public var isEmpty: Bool
-// is the tree empty?
+    // is the tree empty?
     
     public var count: Int
-// how many records are in the tree?
+    // how many records are in the tree?
     
     public var height: Int
-// What is the longest path from root to leaf in the tree?
+    // What is the longest path from root to leaf in the tree?
 
 Note also that a printable graphic of the tree can be obtained in the following property:
 
     public var description: String
-
+    // display like a tree
 
 ### Usage
 To use a tree, make your record type conform to RedBlackTreeRecordProtocol by adding an extension with a computable property called redBlackTreeKey which conforms to RedBlackTreeKeyProtocol and make your key type conform to RedBlackTreeKeyProtocol by adding the two required computable variables governing duplicates and a method to describe ordering:
@@ -95,7 +95,7 @@ To use a tree, make your record type conform to RedBlackTreeRecordProtocol by ad
        public static var duplicatesUseFIFO: Bool { return false }
 
        public static func ⊰(lhs: MyKeyType, rhs: MyKeyType) -> RedBlackTreeComparator {
-           //descending order
+           // in descending order
           if lhs.myKey > rhs.myKey { return .leftTree }
           if lhs.myKey == rhs.myKey { return .matching }
           return .rightTree
@@ -269,4 +269,4 @@ The tree accepted 93 insertions shown in descending order as required:
                              └───◻︎  1:   412.15
                                  └───◦
 
-*/
+
