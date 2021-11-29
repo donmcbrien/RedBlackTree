@@ -195,6 +195,55 @@ extension RedBlackTree {
             }
       }
    }
+
+   /// Find the record which would immediately preceed `key`, whether
+   /// or not `key` itself is in the tree. Returns the rightmost record to the
+   /// left of `key`.
+   /// Duplicates of `key` are not neighbours.
+   public func leftNeighbour(_ key: K, leftRecord: R? = nil) -> R? {
+      switch self {
+         case .empty:
+            return leftRecord
+         case let .node(_, record, left, right):
+            switch (key ⊰ record.redBlackTreeKey, K.duplicatesAllowed) {
+               case (.matching, false): return left.last ?? leftRecord
+               case (.matching, true):
+                  // search further to eliminate duplicates on left
+                  var l: R?
+                  if left.contains(key) { // look deeper
+                     l = left.leftNeighbour(key, leftRecord: leftRecord)
+                  } else { l = left.last ?? leftRecord }
+                  return l
+               case (.leftTree, _): return left.leftNeighbour(key, leftRecord: leftRecord)
+               case (.rightTree, _): return right.leftNeighbour(key, leftRecord: record)
+            }
+      }
+   }
+   
+   /// Find the record which would immediately follow `key`, whether
+   /// or not `key` itself is in the tree. Returns the leftmost record to the
+   /// right of `key`.
+   /// Duplicates of `key` are not neighbours.
+   public func rightNeighbour(_ key: K, rightRecord: R? = nil) -> R? {
+      switch self {
+         case .empty:
+            return rightRecord
+         case let .node(_, record, left, right):
+            switch (key ⊰ record.redBlackTreeKey, K.duplicatesAllowed) {
+               case (.matching, false): return right.first ?? rightRecord
+               case (.matching, true):
+                  // search further to eliminate duplicates right
+                  var r: R?
+                  if right.contains(key) { // look deeper
+                     r = right.rightNeighbour(key, rightRecord: rightRecord)
+                  } else { r = right.first ?? rightRecord }
+                  return r
+               case (.leftTree, _): return left.rightNeighbour(key, rightRecord: record)
+               case (.rightTree, _): return right.rightNeighbour(key, rightRecord: rightRecord)
+            }
+      }
+   }
+
 }
 
 //MARK: - Utilities
