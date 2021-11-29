@@ -174,26 +174,27 @@ extension RedBlackTree {
    /// left of `key` and the leftmost record to the right of `key`.
    /// Duplicate keys are not neighbours.
    public func neighboursFor(_ key: K, leftRecord: R? = nil, rightRecord: R? = nil) -> (R?,R?) {
-      switch self {
-         case .empty:
-            return (leftRecord, rightRecord)
-         case let .node(_, record, left, right):
-            switch (key ⊰ record.redBlackTreeKey, K.duplicatesAllowed) {
-               case (.matching, false): return (left.last ?? leftRecord, right.first ?? rightRecord)
-               case (.matching, true):
-                  // search further to eliminate duplicates left and right
-                  var l,r: R?
-                  if left.contains(key) { // look deeper
-                     l = left.neighboursFor(key, leftRecord: leftRecord, rightRecord: record).0
-                  } else { l = left.last ?? leftRecord }
-                  if right.contains(key) {
-                     r = right.neighboursFor(key, leftRecord: record, rightRecord: rightRecord).1
-                  } else { r = right.first ?? rightRecord }
-                  return (l,r)
-               case (.leftTree, _): return left.neighboursFor(key, leftRecord: leftRecord, rightRecord: record)
-               case (.rightTree, _): return right.neighboursFor(key, leftRecord: record, rightRecord: rightRecord)
-            }
-      }
+      return (leftNeighbour(key), rightNeighbour(key))
+//      switch self {
+//         case .empty:
+//            return (leftRecord, rightRecord)
+//         case let .node(_, record, left, right):
+//            switch (key ⊰ record.redBlackTreeKey, K.duplicatesAllowed) {
+//               case (.matching, false): return (left.last ?? leftRecord, right.first ?? rightRecord)
+//               case (.matching, true):
+//                  // search further to eliminate duplicates left and right
+//                  var l,r: R?
+//                  if left.contains(key) { // look deeper
+//                     l = left.neighboursFor(key, leftRecord: leftRecord, rightRecord: record).0
+//                  } else { l = left.last ?? leftRecord }
+//                  if right.contains(key) {
+//                     r = right.neighboursFor(key, leftRecord: record, rightRecord: rightRecord).1
+//                  } else { r = right.first ?? rightRecord }
+//                  return (l,r)
+//               case (.leftTree, _): return left.neighboursFor(key, leftRecord: leftRecord, rightRecord: record)
+//               case (.rightTree, _): return right.neighboursFor(key, leftRecord: record, rightRecord: rightRecord)
+//            }
+//      }
    }
 
    /// Find the record which would immediately preceed `key`, whether
