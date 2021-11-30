@@ -175,26 +175,6 @@ extension RedBlackTree {
    /// Duplicate keys are not neighbours.
    public func neighboursFor(_ key: K, leftRecord: R? = nil, rightRecord: R? = nil) -> (R?,R?) {
       return (leftNeighbour(key), rightNeighbour(key))
-//      switch self {
-//         case .empty:
-//            return (leftRecord, rightRecord)
-//         case let .node(_, record, left, right):
-//            switch (key ⊰ record.redBlackTreeKey, K.duplicatesAllowed) {
-//               case (.matching, false): return (left.last ?? leftRecord, right.first ?? rightRecord)
-//               case (.matching, true):
-//                  // search further to eliminate duplicates left and right
-//                  var l,r: R?
-//                  if left.contains(key) { // look deeper
-//                     l = left.neighboursFor(key, leftRecord: leftRecord, rightRecord: record).0
-//                  } else { l = left.last ?? leftRecord }
-//                  if right.contains(key) {
-//                     r = right.neighboursFor(key, leftRecord: record, rightRecord: rightRecord).1
-//                  } else { r = right.first ?? rightRecord }
-//                  return (l,r)
-//               case (.leftTree, _): return left.neighboursFor(key, leftRecord: leftRecord, rightRecord: record)
-//               case (.rightTree, _): return right.neighboursFor(key, leftRecord: record, rightRecord: rightRecord)
-//            }
-//      }
    }
 
    /// Find the record which would immediately preceed `key`, whether
@@ -207,13 +187,13 @@ extension RedBlackTree {
             return leftRecord
          case let .node(_, record, left, right):
             switch (key ⊰ record.redBlackTreeKey, K.duplicatesAllowed) {
-               case (.matching, false): return left.last ?? leftRecord
+               case (.matching, false): return left.rightmost ?? leftRecord
                case (.matching, true):
                   // search further to eliminate duplicates on left
                   var l: R?
                   if left.contains(key) { // look deeper
                      l = left.leftNeighbour(key, leftRecord: leftRecord)
-                  } else { l = left.last ?? leftRecord }
+                  } else { l = left.rightmost ?? leftRecord }
                   return l
                case (.leftTree, _): return left.leftNeighbour(key, leftRecord: leftRecord)
                case (.rightTree, _): return right.leftNeighbour(key, leftRecord: record)
@@ -231,13 +211,13 @@ extension RedBlackTree {
             return rightRecord
          case let .node(_, record, left, right):
             switch (key ⊰ record.redBlackTreeKey, K.duplicatesAllowed) {
-               case (.matching, false): return right.first ?? rightRecord
+               case (.matching, false): return right.leftmost ?? rightRecord
                case (.matching, true):
                   // search further to eliminate duplicates right
                   var r: R?
                   if right.contains(key) { // look deeper
                      r = right.rightNeighbour(key, rightRecord: rightRecord)
-                  } else { r = right.first ?? rightRecord }
+                  } else { r = right.leftmost ?? rightRecord }
                   return r
                case (.leftTree, _): return left.rightNeighbour(key, rightRecord: record)
                case (.rightTree, _): return right.rightNeighbour(key, rightRecord: rightRecord)
@@ -258,25 +238,25 @@ extension RedBlackTree {
    
    /// Fetch the first element in a `RedBlackTree`.
    /// Returns leftmost record or nil if the tree is empty. Tree is unchanged.
-   public var first: R? {
+   public var leftmost: R? {
       switch self {
          case .empty:
             return nil
          case let .node(_, record, left, _):
-            if left.first == nil { return record }
-            return left.first
+            if left.leftmost == nil { return record }
+            return left.leftmost
       }
    }
    
    /// Fetch the last element in a `RedBlackTree`.
    /// Returns rightmost record or nil if the tree is empty. Tree is unchanged.
-   public var last: R? {
+   public var rightmost: R? {
       switch self {
          case .empty:
             return nil
          case let .node(_, record, _, right):
-            if right.last == nil { return record }
-            return right.last
+            if right.rightmost == nil { return record }
+            return right.rightmost
       }
    }
    
