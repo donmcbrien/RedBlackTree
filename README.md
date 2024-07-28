@@ -4,7 +4,7 @@
     public enum RedBlackTree<R: RedBlackTreeRecordProtocol, K> where K == R.RedBlackTreeKey
     
 ### Overview
-Red-Black Trees are binary search trees with particular characteristics that assist them in remaining balanced (in the sense that all paths to leaves are of roughly equal length).
+Red Black Trees are binary search trees with particular characteristics that assist them in remaining balanced (in the sense that all paths to leaves are of roughly equal length).
 The following are invariant properties designed to achieve this:
 
 - Height-balance means that every vertical path has the same number of black (<b>) nodes giving all paths an equal basic length.

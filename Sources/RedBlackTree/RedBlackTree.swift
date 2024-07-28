@@ -8,7 +8,7 @@
 
 import Foundation
 
-//MARK: - RED-BLACK BINARY TREE
+//MARK: - RED BLACK BINARY TREE
 /// A data structure used to store objects (herein called records) in an
 /// order determined by its `redBlackTreeKey` member.
 ///
