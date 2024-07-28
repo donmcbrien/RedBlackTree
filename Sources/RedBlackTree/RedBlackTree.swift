@@ -596,7 +596,7 @@ public enum Duplicates {
    case refused, useFIFO, useLIFO
 }
 
-/// Node colour for RedBlackTree object
+/// Node colours for RedBlackTree object
 public enum NodeColour: CustomStringConvertible {
    case black
    case red
