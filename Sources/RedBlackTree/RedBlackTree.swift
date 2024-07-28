@@ -3,7 +3,7 @@
 //  RedBlackTree
 //
 //  Created by Don McBrien on 25/05/2019.
-//  Copyright © 2019 Don McBrien. All rights reserved.
+//  Copyright © 2019 thru 2024  Don McBrien. All rights reserved.
 //
 
 import Foundation
@@ -17,8 +17,8 @@ import Foundation
 /// an extension to the record object) which acts as the key to determine
 /// ordering. The key must conform to the `RedBlackTreeKeyProtocol`
 /// which requires that it defines the `⊰` operator which determines ordering
-/// and two boolean functions to set whether keys must be unique or not and
-/// whether they are stored in FIFO or LIFO order.
+/// and an enum to decide whether keys must be unique or not and whether
+/// they are stored in FIFO or LIFO order.
 
 public indirect enum RedBlackTree<R: RedBlackTreeRecordProtocol, K>
 where K == R.RedBlackTreeKey {
@@ -32,7 +32,8 @@ where K == R.RedBlackTreeKey {
 }
 
 //MARK: - PROTOCOLS
-/// Protocol adopted by records stored in an `RedBlackTree`.
+
+/// Protocol adopted by records to be stored in an `RedBlackTree`.
 ///
 /// Defines the key used by records stored in a RedBlackTree. They must
 /// conform to the `RedBlackTreeOrderingProtocol`.
@@ -44,7 +45,7 @@ public protocol RedBlackTreeRecordProtocol {
 /// Protocol adopted by the keys of records stored in an `RedBlackTree`.
 ///
 /// Defines the `⊰` operator used to determine the order of keys and
-/// boolean properties to set whether keys must be unique or not and
+/// an enum property to set whether keys must be unique or not and
 /// whether they are stored in FIFO or LIFO order.
 public protocol RedBlackTreeKeyProtocol {
    /// Comparison operator for ordering a RedBlackTree. Used to
@@ -59,29 +60,27 @@ public protocol RedBlackTreeKeyProtocol {
    /// after. This behaviour is intentional to support managing a list based
    /// on dynamic keys.
    static func ⊰(lhs: Self,rhs: Self) -> RedBlackTreeComparator
-   /// Indicates whether the RedBlackTree can have duplicate entries.
+   /// Indicates whether the RedBlackTree can have duplicate entries and,
+   /// if so, how they are sorted.
    ///
-   /// - Defaults to `false` meaning duplicate entries should be ignored on insertion.
-   /// - Should be overridden to `true` if duplicates are permitted.
-   static var duplicatesAllowed: Bool { get }
-   /// Indicates how duplicate entries are extracted from the RedBlackTree.
-   /// Is meaningless if `duplicatesAllowed` is `false`
-   ///
-   /// - Defaults to `true` meaning deletion is First-In-First-Out.
-   /// - Should be overridden to `false` if deletion is Last-In-First-Out.
-   static var duplicatesUseFIFO: Bool { get }
+   /// - Defaults to `refused` meaning duplicate entries should be ignored on insertion.
+   /// - Should be overridden to `useFIFO` or `useLIFO` if duplicates are permitted. FIFO
+   ///   means that new duplicate entries are stored before (to the left of) all existing
+   ///   duplicates and LIFO means they are stored after (to the right of) all existing
+   ///   duplicates. All other operations operate on the rightmost duplicate first.
+   static var duplicates: Duplicates { get }
 }
 
 extension RedBlackTreeKeyProtocol {
-   /// Default implementation. If truee, dplicate entries should be ignored
+   /// Default implementation. If true, duplicate entries should be ignored
    /// when inserting records in the tree.
-   static var duplicatesAllowed: Bool { return false }
-   /// default implementation. Deletion is First-In-First-Out. Otherwise First-In-First-Out.
-   static var duplicatesUseFIFO: Bool { return true }
+   static var duplicates: Duplicates { return .refused }
 }
 
-//MARK:- Contains/Neighbours.  Examine the Tree without changing it.
+//MARK: - Contains/Neighbours.  Examine the Tree without changing it.
+
 extension RedBlackTree {
+   
    /// Recursively checks if `RedBlackTree` contains `key`?
    ///
    /// - Parameter key: key part of desired record
@@ -110,16 +109,14 @@ extension RedBlackTree {
       switch self {
          case .empty: return nil
          case let .node(_, record, left, right):
-            switch (key ⊰ record.redBlackTreeKey, K.duplicatesAllowed, K.duplicatesUseFIFO) {
-               case (.matching, false, _): return record
-               case (.matching, true, let usesFIFO):
-                  var e: R?
-                  if usesFIFO { e = left.fetch(key) }
-                  else { e = right.fetch(key) }
+            switch (key ⊰ record.redBlackTreeKey, K.duplicates) {
+               case (.matching, .refused): return record
+               case (.matching, _):
+                  let e = left.fetch(key)
                   if e == nil { return record }
                   else { return e }
-               case (.leftTree, _, _): return left.fetch(key)
-               case (.rightTree, _, _): return right.fetch(key)
+               case (.leftTree, _): return left.fetch(key)
+               case (.rightTree, _): return right.fetch(key)
             }
       }
    }
@@ -138,22 +135,16 @@ extension RedBlackTree {
          case .empty:
             return result
          case let .node(_, record, left, right):
-            switch (key ⊰ record.redBlackTreeKey, K.duplicatesAllowed, K.duplicatesUseFIFO) {
-               case (.matching, false, _):
+            switch (key ⊰ record.redBlackTreeKey, K.duplicates) {
+               case (.matching, .refused):
                   result.append(record)
-               case (.matching, true, let usesFIFO):
-                  if usesFIFO {
-                     result.append(contentsOf: left.fetchAll(key))
-                     result.append(record)
-                     result.append(contentsOf: right.fetchAll(key))
-                  } else {
-                     result.append(contentsOf: right.fetchAll(key))
-                     result.append(record)
-                     result.append(contentsOf: left.fetchAll(key))
-                  }
-               case (.leftTree, _, _):
+               case (.matching, _):
                   result.append(contentsOf: left.fetchAll(key))
-               case (.rightTree, _, _):
+                  result.append(record)
+                  result.append(contentsOf: right.fetchAll(key))
+               case (.leftTree, _):
+                  result.append(contentsOf: left.fetchAll(key))
+               case (.rightTree, _):
                   result.append(contentsOf: right.fetchAll(key))
             }
       }
@@ -186,9 +177,9 @@ extension RedBlackTree {
          case .empty:
             return leftRecord
          case let .node(_, record, left, right):
-            switch (key ⊰ record.redBlackTreeKey, K.duplicatesAllowed) {
-               case (.matching, false): return left.rightmost ?? leftRecord
-               case (.matching, true):
+            switch (key ⊰ record.redBlackTreeKey, K.duplicates) {
+               case (.matching, .refused): return left.rightmost ?? leftRecord
+               case (.matching, _):
                   // search further to eliminate duplicates on left
                   var l: R?
                   if left.contains(key) { // look deeper
@@ -210,9 +201,9 @@ extension RedBlackTree {
          case .empty:
             return rightRecord
          case let .node(_, record, left, right):
-            switch (key ⊰ record.redBlackTreeKey, K.duplicatesAllowed) {
-               case (.matching, false): return right.leftmost ?? rightRecord
-               case (.matching, true):
+            switch (key ⊰ record.redBlackTreeKey, K.duplicates) {
+               case (.matching, .refused): return right.leftmost ?? rightRecord
+               case (.matching, _):
                   // search further to eliminate duplicates right
                   var r: R?
                   if right.contains(key) { // look deeper
@@ -302,7 +293,7 @@ extension RedBlackTree: CustomStringConvertible {
                         _ bottom: String = "") -> String {
       switch self {
          case .empty:
-            return centre + "◦\n"
+            return centre + "•\n"
          case let .node(colour, record, .empty, .empty):
             return centre + "\(colour)\(record) (key: \(record.redBlackTreeKey))\n"
          case let .node(colour, record, left, right):
@@ -313,7 +304,7 @@ extension RedBlackTree: CustomStringConvertible {
    }
    
    public var description: String {
-      return diagram()
+      return "Warning:\nEmpty leaf pairs excluded for readibility,\nbut remember to count them as black\n" + diagram()
    }
 }
 
@@ -378,14 +369,14 @@ extension RedBlackTree {
          case .empty:
             return (.node(.red, element, .empty, .empty), nil)
          case let .node(colour, record, left, right):
-            switch (element.redBlackTreeKey ⊰ record.redBlackTreeKey, K.duplicatesAllowed, K.duplicatesUseFIFO) {
-               case (.matching, false, _):
+            switch (element.redBlackTreeKey ⊰ record.redBlackTreeKey, K.duplicates) {
+               case (.matching, .refused):
                   return (self, record)
-               case (.matching, true, false),(.leftTree, _, _):
+               case (.matching, .useLIFO),(.leftTree, _):
                   let (l, old) = left.recursiveInsert(element)
                   if let old = old { return (self, old) }
                   return (RedBlackTree<R,K>.node(colour, record, l, right).redBalanced(), old)
-               case (.matching, true, true),(.rightTree, _, _):
+               case (.matching, .useFIFO),(.rightTree, _):
                   let (r, old) = right.recursiveInsert(element)
                   if let old = old { return (self, old) }
                   return (RedBlackTree<R,K>.node(colour, record, left, r).redBalanced(), old)
@@ -435,24 +426,22 @@ extension RedBlackTree {
          case .empty:
             return (self, false, nil)
          case let .node(_, record, _, _):
-            switch (key ⊰ record.redBlackTreeKey, K.duplicatesAllowed, K.duplicatesUseFIFO) {
-               case (.matching, false, _):    // found it!!
+            switch (key ⊰ record.redBlackTreeKey, K.duplicates) {
+               case (.matching, .refused):    // found it!!
                   let s = self.replace()
                   return (s.0, s.1, record)
-               case (.matching, true, let usesFIFO):    // found it!!
-                  var e:(tree: RedBlackTree<R,K>, fixHeight: Bool, deleted: R?)
-                  if usesFIFO { e = self.leftDelete(key) }
-                  else { e = self.rightDelete(key) }
+               case (.matching, _):    // found it!!
+                  let e:(tree: RedBlackTree<R,K>, fixHeight: Bool, deleted: R?) = self.leftDelete(key)
                   if e.deleted == nil {
                      let s = self.replace()
                      return (s.0, s.1, record)
                   } else {
                      return (e.tree.redBalanced(), e.fixHeight, e.deleted)
                   }
-               case (.leftTree, _, _):      // Still looking (left)
+               case (.leftTree, _):      // Still looking (left)
                   let s = self.leftDelete(key)
                   return (s.tree.redBalanced(), s.fixHeight, s.deleted)
-               case (.rightTree, _, _):     // Still looking (right)
+               case (.rightTree, _):     // Still looking (right)
                   let s = self.rightDelete(key)
                   return (s.tree.redBalanced(), s.fixHeight, s.deleted)
             }
@@ -601,6 +590,10 @@ public enum RedBlackTreeComparator {
    case matching
    case leftTree
    case rightTree
+}
+
+public enum Duplicates {
+   case refused, useFIFO, useLIFO
 }
 
 /// Node colour for RedBlackTree object

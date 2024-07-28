@@ -40,18 +40,18 @@ A number of methods can be used to examing records in the tree without changing 
     public func contains(_ key: K) -> Bool 
     // reports whether a record containing the key is present
 
-    public var first: R?
-    // Find the leftmost record
+    public var leftmost: R?
+    // Find the first/leftmost record
 
-    public var last: R?
-    // Find the rightmost record
+    public var rightmost: R?
+    // Find the last/rightmost record
 
     public func fetch(_ key: K) -> R? {
     // fetches a copy of the only record (or first when duplicates permitted), if any, containing the key
 
     public func fetchAll(_ key: K) -> [R]
     // only relevant where duplicates are permitted, this method fetches copies of all records, if any,
-    // containing the key, and sorted by the rule in the RedBlackTreeKeyProtocol
+    // containing the key, and sorted according to the rule in the RedBlackTreeKeyProtocol
 
     public func neighboursOf(_ key: K) -> (R?,R?)?
     // fetches the immediate neighbours, left and right, of the record containing the key (but only 
@@ -83,7 +83,7 @@ Note also that a printable graphic of the tree can be obtained in the following 
     // display like a tree
 
 ### Usage
-To use a tree, make your record type conform to RedBlackTreeRecordProtocol by adding an extension with a computable property called redBlackTreeKey which conforms to RedBlackTreeKeyProtocol and make your key type conform to RedBlackTreeKeyProtocol by adding the two required computable variables governing duplicates and a method to describe ordering:
+To use a tree, make your record type conform to RedBlackTreeRecordProtocol by adding an extension with a computable property called redBlackTreeKey which conforms to RedBlackTreeKeyProtocol and make your key type conform to RedBlackTreeKeyProtocol by adding the required computable variable governing duplicates and a method to describe ordering:
 
     extension MyRecordType: RedBlackTreeRecordProtocol {
        public typealias RedBlackTreeKey = MyKeyType
@@ -91,8 +91,7 @@ To use a tree, make your record type conform to RedBlackTreeRecordProtocol by ad
     }
 
     extension MyKeyType: RedBlackTreeKeyProtocol {
-       public static var duplicatesAllowed: Bool { return false }
-       public static var duplicatesUseFIFO: Bool { return false }
+       public static var duplicates: Duplicate { return .refused }
 
        public static func ⊰(lhs: MyKeyType, rhs: MyKeyType) -> RedBlackTreeComparator {
            // in descending order
@@ -126,8 +125,7 @@ Now you can declare and use a RedBlackTree
      }
 
      extension Int: RedBlackTreeKeyProtocol {
-        public static var duplicatesAllowed: Bool { return false }
-        public static var duplicatesUseFIFO: Bool { return false }
+        public static var duplicates: Duplicates { return .refused }
      
         public static func ⊰(lhs: Int, rhs: Int) -> RedBlackTreeComparator {
            // descending order
@@ -149,124 +147,130 @@ Now you can declare and use a RedBlackTree
 
      print("    ",myTree)
 
-These 7 records were refused insertion because their keys were already in use:
+These 6 records were refused insertion because their keys were already in use:
 
-     817:  -233.86
-     982:   958.22
-     289:     5.01
-     276:   103.60
-     408:  -270.96
-     144:   239.42
-     443:   228.44
-     
-The tree accepted 93 insertions shown in descending order as required:
+     386:   709.28
+     300:  -596.11
+     445:   137.53
+      20:  -823.35
+     282:   -67.44
+     386:    48.41
+          
+The tree accepted 94 insertions shown in descending order as required:
 
-                             ┌───◦
-                         ┌───◻︎982:   354.64
-                         │   └───◼︎976:  -994.05
-                     ┌───◻︎894:   585.16
-                     │   └───◻︎885:  -153.29
-                 ┌───◼︎880:   998.87
-                 │   │       ┌───◼︎873:   662.16
-                 │   │   ┌───◻︎867:  -171.26
-                 │   │   │   └───◦
-                 │   └───◻︎856:  -684.05
-                 │       │   ┌───◦
-                 │       └───◻︎847:  -827.64
-                 │           └───◼︎831:  -823.29
-             ┌───◻︎827:  -515.68
-             │   │   ┌───◻︎822:  -327.00
-             │   └───◻︎817:   582.73
-             │       └───◻︎810:   965.88
-         ┌───◼︎808:  -253.46
-         │   │           ┌───◻︎802:  -732.22
-         │   │       ┌───◻︎786:   343.39
-         │   │       │   └───◻︎778:   -19.69
-         │   │   ┌───◼︎760:  -386.97
-         │   │   │   │   ┌───◻︎759:  -882.20
-         │   │   │   └───◻︎735:  -881.69
-         │   │   │       └───◻︎726:  -245.34
-         │   └───◻︎719:  -228.05
-         │       │           ┌───◼︎685:  -689.12
-         │       │       ┌───◻︎682:   593.68
-         │       │       │   └───◦
-         │       │   ┌───◻︎679:    55.27
-         │       │   │   │   ┌───◻︎678:   598.57
-         │       │   │   └───◼︎669:   943.42
-         │       │   │       └───◻︎631:  -991.21
-         │       └───◼︎626:   517.00
-         │           │       ┌───◦
-         │           │   ┌───◻︎622:   931.63
-         │           │   │   └───◼︎614:   139.15
-         │           └───◻︎603:   955.66
-         │               │   ┌───◻︎602:  -426.36
-         │               └───◼︎594:  -621.88
-         │                   └───◻︎593:   513.93
-     ┌───◻︎548:  -547.15
-     │   │           ┌───◼︎529:  -447.35
-     │   │       ┌───◻︎527:  -142.95
-     │   │       │   └───◦
-     │   │   ┌───◻︎522:  -579.74
-     │   │   │   │   ┌───◼︎504:  -777.84
-     │   │   │   └───◻︎490:  -771.97
-     │   │   │       └───◼︎467:   766.01
-     │   └───◻︎444:   269.77
-     │       │   ┌───◻︎443:   804.97
-     │       └───◻︎436:  -818.27
-     │           └───◻︎426:  -689.36
-     ◻︎425:   640.41
-     │           ┌───◻︎422:   413.05
-     │       ┌───◻︎408:  -242.73
-     │       │   │   ┌───◦
-     │       │   └───◻︎404:  -699.06
-     │       │       └───◼︎402:  -122.03
-     │   ┌───◻︎395:    40.47
-     │   │   │       ┌───◻︎375:  -984.12
-     │   │   │   ┌───◼︎371:  -243.60
-     │   │   │   │   └───◻︎369:  -736.36
-     │   │   └───◻︎353:  -646.78
-     │   │       │   ┌───◻︎346:   -80.48
-     │   │       └───◼︎339:   -55.64
-     │   │           │   ┌───◦
-     │   │           └───◻︎337:  -996.52
-     │   │               └───◼︎331:  -776.84
-     └───◻︎324:  -980.52
-         │           ┌───◻︎318:  -540.60
-         │       ┌───◻︎315:  -799.81
-         │       │   └───◻︎308:  -398.32
-         │   ┌───◻︎304:   722.83
-         │   │   │   ┌───◻︎293:   193.68
-         │   │   └───◻︎289:  -834.68
-         │   │       └───◻︎276:  -692.00
-         └───◼︎273:  -147.07
-             │       ┌───◻︎267:   178.06
-             │   ┌───◻︎256:   357.48
-             │   │   │   ┌───◼︎249:  -313.83
-             │   │   └───◻︎246:   759.38
-             │   │       └───◦
-             └───◻︎231:   998.49
-                 │               ┌───◼︎214:   530.86
-                 │           ┌───◻︎212:    46.77
-                 │           │   └───◦
-                 │       ┌───◼︎208:  -718.03
-                 │       │   └───◻︎193:   617.38
-                 │   ┌───◻︎180:   457.16
-                 │   │   │   ┌───◦
-                 │   │   └───◻︎179:   484.78
-                 │   │       └───◼︎153:   345.63
-                 └───◼︎152:  -689.46
-                     │       ┌───◻︎144:    -4.99
-                     │   ┌───◼︎ 88:   600.10
-                     │   │   │   ┌───◼︎ 81:  -685.56
-                     │   │   └───◻︎ 79:   235.91
-                     │   │       └───◦
-                     └───◻︎ 68:   377.95
-                         │       ┌───◦
-                         │   ┌───◻︎ 56:  -879.63
-                         │   │   └───◼︎ 38:   837.06
-                         └───◼︎ 17:   931.47
-                             │   ┌───◼︎  7:   480.98
-                             └───◻︎  1:   412.15
-                                 └───◦
+                    ┌───◼︎995:  -197.91 (key: 995)
+                ┌───◼︎987:    56.72 (key: 987)
+                │   └───◼︎968:  -466.42 (key: 968)
+            ┌───◻︎947:   532.92 (key: 947)
+            │   │       ┌───◼︎946:   994.28 (key: 946)
+            │   │   ┌───◻︎944:  -594.07 (key: 944)
+            │   │   │   └───◼︎938:  -648.48 (key: 938)
+            │   └───◼︎935:    15.14 (key: 935)
+            │       └───◼︎931:   360.38 (key: 931)
+        ┌───◼︎925:   918.26 (key: 925)
+        │   │   ┌───◼︎918:   798.22 (key: 918)
+        │   └───◼︎907:   582.47 (key: 907)
+        │       │   ┌───◻︎898:   711.78 (key: 898)
+        │       └───◼︎897:   251.73 (key: 897)
+        │           └───•
+    ┌───◻︎894:  -398.19 (key: 894)
+    │   │           ┌───◻︎889:   443.88 (key: 889)
+    │   │       ┌───◼︎865:   999.27 (key: 865)
+    │   │       │   └───•
+    │   │   ┌───◼︎851:   927.38 (key: 851)
+    │   │   │   └───◼︎836:  -596.74 (key: 836)
+    │   └───◼︎833:   690.30 (key: 833)
+    │       │       ┌───◼︎815:   228.53 (key: 815)
+    │       │   ┌───◻︎813:    -1.03 (key: 813)
+    │       │   │   └───◼︎808:  -993.76 (key: 808)
+    │       └───◼︎788:  -243.71 (key: 788)
+    │           │   ┌───•
+    │           └───◼︎784:   951.92 (key: 784)
+    │               └───◻︎769:  -603.63 (key: 769)
+┌───◼︎754:   -45.41 (key: 754)
+│   │               ┌───◼︎750:   845.04 (key: 750)
+│   │           ┌───◼︎743:   238.54 (key: 743)
+│   │           │   └───◼︎728:  -693.84 (key: 728)
+│   │       ┌───◻︎727:  -873.62 (key: 727)
+│   │       │   │       ┌───•
+│   │       │   │   ┌───◼︎725:   186.37 (key: 725)
+│   │       │   │   │   └───◻︎714:  -465.34 (key: 714)
+│   │       │   └───◼︎709:  -877.99 (key: 709)
+│   │       │       │   ┌───◼︎689:   963.06 (key: 689)
+│   │       │       └───◻︎680:  -376.42 (key: 680)
+│   │       │           │   ┌───•
+│   │       │           └───◼︎669:  -481.20 (key: 669)
+│   │       │               └───◻︎657:   280.85 (key: 657)
+│   │   ┌───◼︎644:  -659.26 (key: 644)
+│   │   │   │           ┌───◻︎638:   311.84 (key: 638)
+│   │   │   │       ┌───◼︎624:   164.04 (key: 624)
+│   │   │   │       │   └───◻︎575:  -695.80 (key: 575)
+│   │   │   │   ┌───◻︎558:   719.17 (key: 558)
+│   │   │   │   │   │   ┌───•
+│   │   │   │   │   └───◼︎556:   774.74 (key: 556)
+│   │   │   │   │       └───◻︎494:   264.27 (key: 494)
+│   │   │   └───◼︎482:  -130.76 (key: 482)
+│   │   │       └───◼︎469:   447.85 (key: 469)
+│   └───◻︎468:  -627.72 (key: 468)
+│       │       ┌───◼︎456:   347.73 (key: 456)
+│       │   ┌───◼︎447:     8.29 (key: 447)
+│       │   │   └───◼︎445:   -71.57 (key: 445)
+│       └───◼︎431:   417.79 (key: 431)
+│           │       ┌───•
+│           │   ┌───◼︎422:  -574.63 (key: 422)
+│           │   │   └───◻︎399:  -831.89 (key: 399)
+│           └───◼︎386:   823.99 (key: 386)
+│               │   ┌───◼︎379:   904.34 (key: 379)
+│               └───◻︎369:    58.54 (key: 369)
+│                   └───◼︎363:  -508.25 (key: 363)
+◼︎327:    24.63 (key: 327)
+│                   ┌───◼︎320:  -500.18 (key: 320)
+│               ┌───◻︎306:   728.63 (key: 306)
+│               │   │   ┌───•
+│               │   └───◼︎300:   153.83 (key: 300)
+│               │       └───◻︎285:  -767.35 (key: 285)
+│           ┌───◼︎283:   401.83 (key: 283)
+│           │   └───◼︎282:  -803.43 (key: 282)
+│       ┌───◻︎263:  -133.82 (key: 263)
+│       │   │           ┌───•
+│       │   │       ┌───◼︎252:  -868.20 (key: 252)
+│       │   │       │   └───◻︎251:   502.95 (key: 251)
+│       │   │   ┌───◻︎226:  -578.34 (key: 226)
+│       │   │   │   └───◼︎218:   585.39 (key: 218)
+│       │   └───◼︎216:   249.65 (key: 216)
+│       │       │   ┌───◻︎181:  -281.22 (key: 181)
+│       │       └───◼︎174:   555.64 (key: 174)
+│       │           └───•
+│   ┌───◼︎166:  -899.79 (key: 166)
+│   │   │       ┌───◻︎158:   857.83 (key: 158)
+│   │   │   ┌───◼︎156:  -774.49 (key: 156)
+│   │   │   │   └───•
+│   │   └───◼︎149:  -705.35 (key: 149)
+│   │       │   ┌───•
+│   │       └───◼︎143:   550.85 (key: 143)
+│   │           └───◻︎134:  -688.87 (key: 134)
+└───◼︎128:   226.58 (key: 128)
+    │           ┌───◻︎ 85:  -149.89 (key: 85)
+    │       ┌───◼︎ 82:   167.45 (key: 82)
+    │       │   └───◻︎ 79:   515.17 (key: 79)
+    │   ┌───◼︎ 77:   206.16 (key: 77)
+    │   │   │   ┌───◻︎ 73:  -135.19 (key: 73)
+    │   │   └───◼︎ 63:   788.58 (key: 63)
+    │   │       └───◻︎ 54:   270.13 (key: 54)
+    └───◼︎ 52:  -136.49 (key: 52)
+        │       ┌───◻︎ 39:   -94.06 (key: 39)
+        │   ┌───◼︎ 33:  -722.10 (key: 33)
+        │   │   └───•
+        └───◼︎ 32:  -491.40 (key: 32)
+            │   ┌───◻︎ 29:  -407.77 (key: 29)
+            └───◼︎ 26:  -903.29 (key: 26)
+                └───◻︎ 20:   876.85 (key: 20)
 
 
+Note that empty leaf pairs such as those attached to key 158:
+
+       ┌───◻︎158:   857.83 (key: 158)
+   ┌───◼︎156:  -774.49 (key: 156)
+   │   └───•
+
+are excluded from the printout to improve readibility, but remember to count them as black. Key 156 shows it's empty right node.
