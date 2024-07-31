@@ -20,19 +20,20 @@ You use red-black trees as data structures to provide rapid access to data. The 
 A newly initialised red-black tree is always empty. Records can be added singly or in collections using one of the following methods:
 
     public mutating func insert(_ record: R) -> Bool
-// adds one record if permitted (i.e. if duplicates allowed) 
+    // adds one record if permitted (i.e. if duplicates allowed) 
    
     public mutating func insert(_ arrayOfRecords: [R]) -> [R]
-// adds multiple record and returns array of records which were rejected
+    // adds multiple record and returns array of records which were rejected
 
 Records can be removed singly or in collections using one of the following methods:
 
     public mutating func remove(_ key: K) -> R?
-// removes the first record, if any, containing the key
+    // removes the first record, if any, containing the key
 
     public mutating func removeAll(_ key: K) -> [R]
-// only relevant where duplicates are permitted, this method removes all records, if any,
-// containg the key, and sorted by the rule in the RedBlackTreeKeyProtocol
+    // only relevant where duplicates are permitted, this method removes
+    // all records, if any, containg the key, and sorted by the rule in the
+    // RedBlackTreeKeyProtocol
 
 ### Record Inspection
 A number of methods can be used to examing records in the tree without changing the tree:
@@ -47,19 +48,23 @@ A number of methods can be used to examing records in the tree without changing 
     // Find the last/rightmost record
 
     public func fetch(_ key: K) -> R? {
-    // fetches a copy of the only record (or first when duplicates permitted), if any, containing the key
+    // fetches a copy of the only record (or first when duplicates permitted),
+    // if any, containing the key
 
     public func fetchAll(_ key: K) -> [R]
-    // only relevant where duplicates are permitted, this method fetches copies of all records, if any,
-    // containing the key, and sorted according to the rule in the RedBlackTreeKeyProtocol
+    // only relevant where duplicates are permitted, this method fetches copies
+    // of all records, if any, containing the key, and sorted according to the
+    // rule in the RedBlackTreeKeyProtocol
 
     public func neighboursOf(_ key: K) -> (R?,R?)?
-    // fetches the immediate neighbours, left and right, of the record containing the key (but only 
-    // if such a record) is present in the tree. Duplicates of key are ignored.
+    // fetches the immediate neighbours, left and right, of the record containing
+    // the key (but only if such a record) is present in the tree. 
+    // Duplicates of key are ignored.
 
     public func neighboursFor(_ key: K, leftRecord: R? = nil, rightRecord: R? = nil) -> (R?,R?)
-    // fetches the immediate neighbours, left and right, of where a record containing the key would be
-    // (whether or not such a record is present). Duplicates of key are ignored.
+    // fetches the immediate neighbours, left and right, of where a record
+    // containing the key would be (whether or not such a record is present).
+    // Duplicates of key are ignored.
 
 ### Map -> Array
     public func map<T>(_ transform:(R) -> T) -> [T]
