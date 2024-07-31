@@ -312,12 +312,12 @@ extension RedBlackTree: CustomStringConvertible {
          case let .node(colour, record, .empty, .empty):
             return centre + "\(colour)\(record) (key: \(record.redBlackTreeKey))\n"
          case let .node(colour, record, left, right):
-            return left.diagram(top + "    ", top + "┌───", top + "│   ")
+            return right.diagram(top + "    ", top + "┌───", top + "│   ")
             + centre + "\(colour)\(record) (key: \(record.redBlackTreeKey))\n"
-            + right.diagram(bottom + "│   ", bottom + "└───", bottom + "    ")
+            + left.diagram(bottom + "│   ", bottom + "└───", bottom + "    ")
       }
    }
-   
+
    public var description: String {
       return "Warning:\nEmpty leaf pairs excluded for readibility,\nbut remember to count them as black\n" + diagram()
    }
