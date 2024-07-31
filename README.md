@@ -7,12 +7,12 @@
 Red Black Trees are binary search trees with particular characteristics that assist them in remaining balanced (in the sense that all paths to leaves are of roughly equal length).
 The following are invariant properties designed to achieve this:
 
-- Height-balance means that every vertical path has the same number of black (<b>) nodes giving all paths an equal basic length.
-- Red-balance means that no vertical path has two adjacent red (<r>) nodes so that path lengths may differ but never exceed twice the <b> height. Maximum height is therefore 2log2(n+1) for a tree containing n entries
-- The root node of the entire tree is always black <b>
-- Empty nodes (<e>) are always counted as black.
+- Height-balance means that every vertical path has the same number of black (◼︎) nodes giving all paths an equal basic length.
+- Red-balance means that no vertical path has two adjacent red (◻︎) nodes so that path lengths may differ but never exceed twice the ◼︎ height. Maximum height is therefore 2log2(n+1) for a tree containing n entries
+- The root node of the entire tree is always black ◼︎
+- Empty nodes (•) are always counted as black.
 
-A tree is a recursive structure in that every tree is composed of sub-trees and every sub-tree is a tree which obeys all the invariant rules (except that a sub-tree may have a <r> root). Key tree-maintenance operations are insert and delete. During these operations the invariants may be disturbed but they must be restored before the operation is completed.
+A tree is a recursive structure in that every tree is composed of sub-trees and every sub-tree is a tree which obeys all the invariant rules (except that a sub-tree may have a ◻︎ root). Key tree-maintenance operations are insert and delete. During these operations the invariants may be disturbed but they must be restored before the operation is completed.
 
 You use red-black trees as data structures to provide rapid access to data. The data stored must conform to the RedBlackTreeRecordProtocol which essentially means it should contain a property which conforms to the RedBlackTreeKeyProtocol. This latter protocol is not unlike the Comparable protocol in that it shows how records should be ordered in the tree but it also governs the treatment of duplicate records.
 
