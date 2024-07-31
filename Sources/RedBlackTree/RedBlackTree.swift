@@ -275,15 +275,16 @@ extension RedBlackTree {
       }
    }
    
-   /// Measures the black height of a `RedBlackTree`.
-   /// Tree is unchanged.
-   public var blackHeight: Int {
+   /// Counts black nodes on any path from root to leaf in a `RedBlackTree`.
+   /// Tree is unchanged. On the longest path:
+   /// height = black nodes + white nodes - 1
+   public var blackNodesPerPath: Int {
       switch self {
          case .empty:
             return 1
          case let .node(color, _, left, _):
-            if color == .black { return 1 + left.blackHeight }
-            return left.blackHeight
+            if color == .black { return 1 + left.blackNodesPerPath }
+            return left.blackNodesPerPath
       }
    }
 }
