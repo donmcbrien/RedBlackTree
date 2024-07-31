@@ -77,9 +77,6 @@ Finally a number of methods can be used to examine the tree in its entirety:
     public var height: Int
     // What is the longest path from root to leaf in the tree?
 
-   public var blackNodesPerPath: Int
-   // How many black nodes on each path from root to leaf in the tree?
-
 Note also that a printable graphic of the tree can be obtained in the following property:
 
     public var description: String
